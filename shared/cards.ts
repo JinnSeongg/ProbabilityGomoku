@@ -1,0 +1,40 @@
+﻿import type { CardDefinition } from "./types";
+
+export const CARD_DEFINITIONS: CardDefinition[] = [
+  { id: "focus", name: "집중", category: "boost", effectType: "turnBoost", value: 15, duration: 1, target: "self", description: "이번 턴 내 색 확률 +15%p", requiresSelection: false, selectionType: "none" },
+  { id: "deep-focus", name: "강집중", category: "boost", effectType: "turnBoost", value: 25, duration: 1, target: "self", description: "이번 턴 내 색 확률 +25%p", requiresSelection: false, selectionType: "none" },
+  { id: "certainty", name: "확신", category: "boost", effectType: "guarantee", value: 100, duration: 1, target: "self", description: "이번 턴 내 색 돌이 확정됩니다.", requiresSelection: false, selectionType: "none" },
+  { id: "stabilize", name: "안정화", category: "boost", effectType: "persistentBuff", value: 10, duration: 3, target: "self", description: "내 다음 3턴 동안 내 색 확률 +10%p", requiresSelection: false, selectionType: "none" },
+  { id: "immersion", name: "몰입", category: "boost", effectType: "immersion", value: 35, duration: 1, target: "self", description: "이번 턴 +35%p, 다음 내 턴 -15%p", requiresSelection: false, selectionType: "none" },
+  { id: "accumulate", name: "누적", category: "boost", effectType: "accumulate", value: 10, duration: 1, target: "self", description: "이번 턴 +10%p. 이후 누적 증가량 +5%p", requiresSelection: false, selectionType: "none" },
+  { id: "unstable", name: "불안정", category: "disruption", effectType: "nextDebuff", value: -15, duration: 1, target: "opponent", description: "다음 상대 턴 상대 색 확률 -15%p", requiresSelection: false, selectionType: "none" },
+  { id: "interference", name: "교란", category: "disruption", effectType: "nextDebuff", value: -25, duration: 1, target: "opponent", description: "다음 상대 턴 상대 색 확률 -25%p", requiresSelection: false, selectionType: "none" },
+  { id: "curse", name: "저주", category: "disruption", effectType: "nextDebuff", value: -35, duration: 1, target: "opponent", description: "다음 상대 턴 상대 색 확률 -35%p", requiresSelection: false, selectionType: "none" },
+  { id: "long-interference", name: "장기 교란", category: "disruption", effectType: "persistentDebuff", value: -10, duration: 3, target: "opponent", description: "상대의 다음 3턴 동안 상대 색 확률 -10%p", requiresSelection: false, selectionType: "none" },
+  { id: "balance-break", name: "균형 붕괴", category: "disruption", effectType: "balanceBreak", value: -50, duration: 1, target: "opponent", description: "다음 상대 턴 -50%p. 상대는 카드 1장 획득", requiresSelection: false, selectionType: "none" },
+  { id: "headwind", name: "역풍", category: "disruption", effectType: "headwind", value: -20, duration: 1, target: "opponent", description: "다음 상대 턴 -20%p. 실패 시 내가 카드 획득", requiresSelection: false, selectionType: "none" },
+  { id: "foresight", name: "예지", category: "information", effectType: "predictCells", value: 1, duration: 1, target: "self", description: "빈칸 1곳의 결과 색을 확인하고 저장", requiresSelection: true, selectionType: "cell" },
+  { id: "precise-foresight", name: "정밀 예지", category: "information", effectType: "predictCells", value: 2, duration: 1, target: "self", description: "빈칸 2곳의 결과 색을 확인하고 저장", requiresSelection: true, selectionType: "cell" },
+  { id: "three-point-scan", name: "삼점 탐색", category: "information", effectType: "threePointScan", value: 3, duration: 1, target: "self", description: "빈칸 3곳을 확인. 그중 한 곳에만 착수 가능", requiresSelection: true, selectionType: "cell" },
+  { id: "next-stone", name: "이번 수 확인", category: "information", effectType: "currentStone", value: 1, duration: 1, target: "self", description: "이번 턴 착수 결과 색을 먼저 확인", requiresSelection: false, selectionType: "none" },
+  { id: "safety-check", name: "안전 확인", category: "information", effectType: "safetyCheck", value: 1, duration: 1, target: "self", description: "빈칸 1곳 확인. 상대 색이면 카드 1장 획득", requiresSelection: true, selectionType: "cell" },
+  { id: "remove-uncertainty", name: "불확실성 제거", category: "information", effectType: "removeUncertainty", value: 1, duration: 1, target: "self", description: "내 색이면 저장, 상대 색이면 저장하지 않음", requiresSelection: true, selectionType: "cell" },
+  { id: "supply", name: "보급", category: "draw", effectType: "draw", value: 1, duration: 1, target: "self", description: "카드 1장 획득", requiresSelection: false, selectionType: "none" },
+  { id: "large-supply", name: "대보급", category: "draw", effectType: "largeSupply", value: 2, duration: 1, target: "self", description: "카드 2장 획득. 이번 턴 내 색 확률 -10%p", requiresSelection: false, selectionType: "none" },
+  { id: "maintenance", name: "정비", category: "draw", effectType: "maintenance", value: 1, duration: 1, target: "self", description: "카드 1장 획득. 성공하면 추가 1장 획득", requiresSelection: false, selectionType: "none" },
+  { id: "gamble-supply", name: "도박 보급", category: "draw", effectType: "gambleSupply", value: 1, duration: 1, target: "self", description: "카드 1장 획득. 30% 확률로 추가 1장", requiresSelection: false, selectionType: "none" },
+  { id: "selective-supply", name: "선택 보급", category: "draw", effectType: "selectiveSupply", value: 1, duration: 1, target: "self", description: "카드 3장 중 1장 획득", requiresSelection: false, selectionType: "none" },
+  { id: "copy", name: "복사", category: "draw", effectType: "copy", value: 1, duration: 1, target: "self", description: "손패 카드 1장을 복사", requiresSelection: false, selectionType: "none" },
+  { id: "recovery", name: "회수", category: "draw", effectType: "recovery", value: 40, duration: 1, target: "self", description: "다음 내 턴 시작 시 40% 확률로 이전 카드와 회수 획득", requiresSelection: false, selectionType: "none" },
+  { id: "reorganize", name: "재정비", category: "reroll", effectType: "rerollOne", value: 1, duration: 1, target: "self", description: "손패 1장을 새 카드로 교체", requiresSelection: false, selectionType: "none" },
+  { id: "overhaul", name: "대정비", category: "reroll", effectType: "rerollAll", value: null, duration: 1, target: "self", description: "손패 전체를 같은 수만큼 교체", requiresSelection: false, selectionType: "none" },
+  { id: "exchange", name: "교환", category: "reroll", effectType: "exchange", value: 1, duration: 1, target: "self", description: "손패 1장을 버리고 새 카드 획득", requiresSelection: false, selectionType: "none" },
+  { id: "insurance", name: "보험", category: "correction", effectType: "insurance", value: 1, duration: 1, target: "self", description: "이번 턴 상대 색이 나오면 카드 1장 획득", requiresSelection: false, selectionType: "none" },
+  { id: "retry", name: "재시도", category: "correction", effectType: "retry", value: 20, duration: 1, target: "self", description: "실패하면 다음 내 턴 내 색 확률 +20%p", requiresSelection: false, selectionType: "none" },
+  { id: "rage", name: "분노", category: "correction", effectType: "rage", value: -20, duration: 1, target: "opponent", description: "실패하면 다음 상대 턴 상대 색 확률 -20%p", requiresSelection: false, selectionType: "none" },
+  { id: "balance", name: "균형", category: "correction", effectType: "balance", value: 1, duration: 1, target: "self", description: "실패하면 손패 1장 리롤", requiresSelection: false, selectionType: "none" },
+  { id: "bad-luck-bank", name: "불운 축적", category: "correction", effectType: "badLuckBank", value: 1, duration: 1, target: "self", description: "실패하면 불운 스택 +1", requiresSelection: false, selectionType: "none" },
+  { id: "resist-fate", name: "운명 저항", category: "correction", effectType: "resistFate", value: 30, duration: 1, target: "self", description: "내 색 확률 30%. 성공 시 카드 2장, 실패 시 다음 턴 +30%p", requiresSelection: false, selectionType: "none" }
+];
+
+export const CARD_BY_ID = new Map(CARD_DEFINITIONS.map((card) => [card.id, card]));

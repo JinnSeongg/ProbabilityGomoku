@@ -1,0 +1,51 @@
+server {
+    listen 80;
+    server_name _;
+
+    root /var/www/html;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /app1/assets/ {
+        alias /var/www/PartyGame-server/dist/client/assets/;
+    }
+
+    location /app1/ {
+        alias /var/www/PartyGame-server/dist/client/;
+        index index.html;
+
+        try_files $uri $uri/ /app1/index.html;
+    }
+
+    location /Gomoku/assets/ {
+        alias /var/www/ProbabilityGomoku/dist/assets/;
+    }
+
+    location /Gomoku/socket.io/ {
+        proxy_pass http://127.0.0.1:3002/Gomoku/socket.io/;
+        proxy_http_version 1.1;
+
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_set_header Host $host;
+    }
+
+    location /Gomoku/ {
+        alias /var/www/ProbabilityGomoku/dist/;
+        index index.html;
+
+        try_files $uri $uri/ /Gomoku/index.html;
+    }
+
+    location /socket.io/ {
+        proxy_pass http://127.0.0.1:3001/socket.io/;
+        proxy_http_version 1.1;
+
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_set_header Host $host;
+    }
+}

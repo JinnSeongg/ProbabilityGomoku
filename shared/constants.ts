@@ -1,0 +1,9 @@
+export const DEFAULT_BOARD_SIZE = 15;
+export const BOARD_SIZE_OPTIONS = [15] as const;
+export const BASE_SELF_PROBABILITY = 80;
+export const MIN_SELF_PROBABILITY = 30;
+export const MAX_SELF_PROBABILITY = 95;
+export const HAND_LIMIT = 5;
+export const START_CARD_CANDIDATES = 5;
+export const START_CARD_SELECTION = 3;
+export const WIN_LENGTH = 5;

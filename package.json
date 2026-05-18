@@ -1,0 +1,32 @@
+{
+  "name": "probability-gomoku",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:client": "vite --host 127.0.0.1 --port 5173",
+    "dev:server": "tsx watch server/src/index.ts",
+    "build": "tsc --noEmit && vite build",
+    "start": "npm run dev"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^5.0.0",
+    "concurrently": "^9.1.2",
+    "express": "^4.19.2",
+    "lucide-react": "^0.468.0",
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.5",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2"
+  }
+}

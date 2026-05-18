@@ -1,0 +1,19 @@
+location /Gomoku/assets/ {
+    alias /var/www/ProbabilityGomoku/dist/assets/;
+}
+
+location /Gomoku/ {
+    alias /var/www/ProbabilityGomoku/dist/;
+    index index.html;
+
+    try_files $uri $uri/ /Gomoku/index.html;
+}
+
+location /Gomoku/socket.io/ {
+    proxy_pass http://127.0.0.1:3002/Gomoku/socket.io/;
+    proxy_http_version 1.1;
+
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "Upgrade";
+    proxy_set_header Host $host;
+}
