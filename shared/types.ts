@@ -1,6 +1,8 @@
 export type StoneColor = "black" | "white";
 export type GameStatus = "waiting" | "cardSelecting" | "playing" | "finished";
 export type CardCategory = "boost" | "disruption" | "information" | "draw" | "reroll" | "correction";
+export type RuleSet = "standard" | "renju";
+export type ForbiddenReason = "overline" | "doubleThree" | "doubleFour";
 
 export interface Cell {
   x: number;
@@ -8,6 +10,26 @@ export interface Cell {
   stone: StoneColor | null;
   placedBy: string | null;
   placedTurn: number | null;
+}
+
+export interface ForbiddenPoint {
+  x: number;
+  y: number;
+  color: StoneColor;
+  reasons: ForbiddenReason[];
+}
+
+export interface RenjuMoveAnalysis {
+  x: number;
+  y: number;
+  color: StoneColor;
+  isFive: boolean;
+  isOverline: boolean;
+  openThreeCount: number;
+  fourCount: number;
+  forbidden: boolean;
+  reasons: ForbiddenReason[];
+  winningLine: Array<{ x: number; y: number }>;
 }
 
 export interface CardDefinition {
@@ -93,6 +115,7 @@ export interface LogEntry {
 export interface GameState {
   roomId: string;
   status: GameStatus;
+  ruleSet: RuleSet;
   boardSize: number;
   board: Cell[][];
   players: PlayerState[];
@@ -100,6 +123,7 @@ export interface GameState {
   turnNumber: number;
   activeEffects: Effect[];
   privatePredictions: Prediction[];
+  forbiddenPoints: ForbiddenPoint[];
   gameLog: LogEntry[];
   winnerPlayerId: string | null;
   winningLine: Array<{ x: number; y: number }>;
@@ -122,6 +146,7 @@ export interface PublicPlayerState {
 export interface ClientGameView {
   roomId: string;
   status: GameStatus;
+  ruleSet: RuleSet;
   boardSize: number;
   board: Cell[][];
   players: PublicPlayerState[];
@@ -130,6 +155,7 @@ export interface ClientGameView {
   turnNumber: number;
   activeEffects: Effect[];
   predictions: Prediction[];
+  forbiddenPoints: ForbiddenPoint[];
   gameLog: LogEntry[];
   winnerPlayerId: string | null;
   winningLine: Array<{ x: number; y: number }>;

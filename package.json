@@ -8,6 +8,7 @@
     "dev:client": "vite --host 127.0.0.1 --port 5173",
     "dev:server": "tsx watch server/src/index.ts",
     "build": "tsc --noEmit && vite build",
+    "test": "tsx --test shared/*.test.ts",
     "start": "npm run dev"
   },
   "dependencies": {

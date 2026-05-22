@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { io, Socket } from "socket.io-client";
 import { Check, Copy, Eye, EyeOff, LogIn, LogOut, Play, Send } from "lucide-react";
 import { CARD_BY_ID } from "../../shared/cards";
-import type { ChatMessage, ClientGameView, StoneColor } from "../../shared/types";
+import type { ChatMessage, ClientGameView, RuleSet, StoneColor } from "../../shared/types";
 import "./styles.css";
 
 type Ack = { ok: boolean; error?: string; roomId?: string; playerId?: string };
@@ -49,6 +49,7 @@ function App() {
 function HomePage({ send, notice }: { send: (event: string, payload?: unknown) => Promise<Ack>; notice: string }) {
   const [nickname, setNickname] = useState("플레이어");
   const [roomId, setRoomId] = useState("");
+  const [ruleSet, setRuleSet] = useState<RuleSet>("renju");
   const boardSize = 15;
   return (
     <main className="home">
@@ -62,8 +63,18 @@ function HomePage({ send, notice }: { send: (event: string, payload?: unknown) =
           닉네임
           <input value={nickname} onChange={(event) => setNickname(event.target.value)} />
         </label>
-        <div className="fixed-board-size">15 x 15 보드</div>
-        <button className="primary" onClick={() => send("createRoom", { nickname, boardSize })}>
+        <label>
+          룰 선택
+          <div className="segmented" role="group" aria-label="게임 룰 선택">
+            <button type="button" className={ruleSet === "renju" ? "active" : ""} onClick={() => setRuleSet("renju")}>
+              렌주룰
+            </button>
+            <button type="button" className={ruleSet === "standard" ? "active" : ""} onClick={() => setRuleSet("standard")}>
+              자유룰
+            </button>
+          </div>
+        </label>
+        <button className="primary" onClick={() => send("createRoom", { nickname, boardSize, ruleSet })}>
           <Play size={18} /> 방 만들기
         </button>
         <div className="join-row">
@@ -79,6 +90,7 @@ function HomePage({ send, notice }: { send: (event: string, payload?: unknown) =
 }
 
 function LobbyPage({ view, send, notice, hideRoomCode, setHideRoomCode }: PageProps) {
+  const isReady = view.me.ready;
   return (
     <main className="lobby">
       <header className="topbar">
@@ -94,8 +106,8 @@ function LobbyPage({ view, send, notice, hideRoomCode, setHideRoomCode }: PagePr
           </article>
         ))}
       </section>
-      <button className="primary" onClick={() => send("playerReady")}>
-        <Check size={18} /> 준비 전환
+      <button className={`primary state-action ${isReady ? "ready" : "waiting"}`} onClick={() => send("playerReady")}>
+        <Check size={18} /> {isReady ? "준비 완료" : "준비하기"}
       </button>
       {notice && <p className="notice">{notice}</p>}
     </main>
@@ -104,7 +116,9 @@ function LobbyPage({ view, send, notice, hideRoomCode, setHideRoomCode }: PagePr
 
 function CardSelectPage({ view, send, notice, hideRoomCode, setHideRoomCode }: PageProps) {
   const [selected, setSelected] = useState<string[]>(view.me.selectedStartCards.map((card) => card.instanceId));
+  const confirmed = view.me.selectedStartCards.length === 3;
   const toggle = (id: string) => {
+    if (confirmed) return;
     setSelected((prev) => (prev.includes(id) ? prev.filter((entry) => entry !== id) : prev.length < 3 ? [...prev, id] : prev));
   };
   return (
@@ -118,8 +132,8 @@ function CardSelectPage({ view, send, notice, hideRoomCode, setHideRoomCode }: P
           <CardButton key={instance.instanceId} instanceId={instance.instanceId} cardId={instance.cardId} active={selected.includes(instance.instanceId)} onClick={() => toggle(instance.instanceId)} />
         ))}
       </section>
-      <button className="primary" disabled={selected.length !== 3} onClick={() => send("selectStartCards", { instanceIds: selected })}>
-        <Check size={18} /> 카드 3장 확정
+      <button className={`primary state-action ${confirmed ? "ready" : "waiting"}`} disabled={selected.length !== 3 || confirmed} onClick={() => send("selectStartCards", { instanceIds: selected })}>
+        <Check size={18} /> {confirmed ? "선택 완료" : `카드 확정 ${selected.length}/3`}
       </button>
       {notice && <p className="notice">{notice}</p>}
     </main>
@@ -195,7 +209,7 @@ function GamePage({ view, chats, send, notice, hideRoomCode, setHideRoomCode }: 
       <header className="topbar game-top">
         <h1>확률 카드 오목</h1>
         <TopActions roomId={view.roomId} send={send} hideRoomCode={hideRoomCode} setHideRoomCode={setHideRoomCode} showLeave />
-        <div className="turn-chip">턴 {view.turnNumber}: {current?.nickname ?? "대기 중"}</div>
+        <div className="turn-chip">{ruleLabel(view.ruleSet)} · 턴 {view.turnNumber}: {current?.nickname ?? "대기 중"}</div>
       </header>
       <section className="board-wrap">
         <GameBoard view={view} onCellClick={useSelected} selectedInfoMode={Boolean(selectedDefinition?.requiresSelection)} selectedTargets={selectedTargets} />
@@ -457,6 +471,10 @@ function modifierLabel(label: string): string {
     "Bad luck stack": "불운 스택"
   };
   return labels[label] ?? label;
+}
+
+function ruleLabel(ruleSet: RuleSet): string {
+  return ruleSet === "renju" ? "렌주룰" : "자유룰";
 }
 
 createRoot(document.getElementById("root")!).render(<App />);

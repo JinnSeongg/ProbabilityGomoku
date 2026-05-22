@@ -5,3 +5,4 @@ dist
 *.log
 deploy/*.zip
 deploy/*.tar.gz
+*.tar.gz

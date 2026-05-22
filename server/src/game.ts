@@ -1,10 +1,11 @@
 ﻿import { CARD_BY_ID } from "../../shared/cards";
 import { DEFAULT_BOARD_SIZE, START_CARD_CANDIDATES, START_CARD_SELECTION } from "../../shared/constants";
+import { analyzeRenjuMove, checkRenjuWin } from "../../shared/renjuRules";
 import { calculateProbability, checkWin, createBoard, rollStoneColor, trimHand } from "../../shared/rules";
-import type { ClientGameView, Effect, GameState, LogEntry, PlayerState, Prediction, StoneColor } from "../../shared/types";
+import type { ClientGameView, Effect, GameState, LogEntry, PlayerState, Prediction, RuleSet, StoneColor } from "../../shared/types";
 import { drawCard, drawCards, id, removeCard, roomCode } from "./utils";
 
-export function createRoom(nickname: string, socketId: string, boardSize = DEFAULT_BOARD_SIZE): GameState {
+export function createRoom(nickname: string, socketId: string, boardSize = DEFAULT_BOARD_SIZE, ruleSet: RuleSet = "renju"): GameState {
   const code = roomCode();
   const now = new Date().toISOString();
   const playerId = id("player");
@@ -27,6 +28,7 @@ export function createRoom(nickname: string, socketId: string, boardSize = DEFAU
   return {
     roomId: code,
     status: "waiting",
+    ruleSet,
     boardSize,
     board: createBoard(boardSize),
     players: [player],
@@ -34,6 +36,7 @@ export function createRoom(nickname: string, socketId: string, boardSize = DEFAU
     turnNumber: 1,
     activeEffects: [],
     privatePredictions: [],
+    forbiddenPoints: [],
     gameLog: [log(1, "system", `${nickname}님이 방 ${code}을(를) 만들었습니다.`)],
     winnerPlayerId: null,
     winningLine: [],
@@ -76,6 +79,7 @@ export function removePlayerFromRoom(game: GameState, playerId: string): string 
     game.board = createBoard(game.boardSize);
     game.currentTurnPlayerId = null;
     game.turnNumber = 1;
+    game.forbiddenPoints = [];
     game.winnerPlayerId = null;
     game.winningLine = [];
     for (const player of game.players) {
@@ -204,6 +208,14 @@ export function placeStone(game: GameState, playerId: string, x: number, y: numb
   const stored = game.privatePredictions.find((entry) => entry.playerId === playerId && ((entry.predictionType === "cell" && entry.x === x && entry.y === y) || entry.predictionType === "currentStone"));
   const probability = calculateProbability(game, playerId, player.currentTurnUsedCard);
   const color: StoneColor = stored?.resultColor ?? rollStoneColor(player.color, probability);
+
+  if (game.ruleSet === "renju" && player.color === "black") {
+    const analysis = analyzeRenjuMove(game.board, x, y, "black");
+    if (analysis.forbidden) {
+      throw new Error(`렌주 금수입니다: ${analysis.reasons.join(", ")}`);
+    }
+  }
+
   cell.stone = color;
   cell.placedBy = playerId;
   cell.placedTurn = game.turnNumber;
@@ -212,7 +224,7 @@ export function placeStone(game: GameState, playerId: string, x: number, y: numb
   player.badLuckStack = success ? 0 : Math.min(3, player.badLuckStack + 1);
   resolveAfterPlaceEffects(game, player, success);
 
-  const win = checkWin(game.board, x, y, color);
+  const win = game.ruleSet === "renju" ? checkRenjuWin(game.board, x, y, color) : checkWin(game.board, x, y, color);
   addLog(
     game,
     "place",
@@ -246,6 +258,7 @@ export function resetFinishedGame(game: GameState, playerId: string): void {
   game.turnNumber = 1;
   game.activeEffects = [];
   game.privatePredictions = [];
+  game.forbiddenPoints = [];
   game.winnerPlayerId = null;
   game.winningLine = [];
   for (const player of game.players) {
@@ -280,6 +293,7 @@ export function clientView(game: GameState, playerId: string): ClientGameView {
   return {
     roomId: game.roomId,
     status: game.status,
+    ruleSet: game.ruleSet,
     boardSize: game.boardSize,
     board: game.board,
     players: game.players.map((player) => ({
@@ -298,6 +312,7 @@ export function clientView(game: GameState, playerId: string): ClientGameView {
     turnNumber: game.turnNumber,
     activeEffects: game.activeEffects.filter((entry) => entry.targetPlayerId === playerId || entry.ownerPlayerId === playerId),
     predictions: game.privatePredictions.filter((entry) => entry.playerId === playerId),
+    forbiddenPoints: game.forbiddenPoints,
     gameLog: game.gameLog.filter((entry) => entry.visibleTo === "all" || entry.visibleTo === playerId).slice(-40),
     winnerPlayerId: game.winnerPlayerId,
     winningLine: game.winningLine,

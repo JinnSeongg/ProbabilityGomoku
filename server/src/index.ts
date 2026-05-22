@@ -2,24 +2,47 @@
 import { createServer } from "node:http";
 import { Server } from "socket.io";
 import { DEFAULT_BOARD_SIZE } from "../../shared/constants";
-import type { ChatMessage, GameState } from "../../shared/types";
+import type { ChatMessage, GameState, RuleSet } from "../../shared/types";
 import { addLog, choosePendingCard, clientView, createRoom, joinRoom, maybeStartCardSelection, placeStone, removePlayerFromRoom, resetFinishedGame, selectStartCards, useCard } from "./game";
 import { store } from "./store";
 import { id } from "./utils";
 
 const app = express();
 const httpServer = createServer(app);
+const allowedOrigins = new Set([
+  "https://jinn.ing",
+  "https://www.jinn.ing",
+  "http://jinn.ing",
+  "http://www.jinn.ing",
+  "http://161.33.4.141",
+  "http://127.0.0.1:5173",
+  "http://localhost:5173"
+]);
 const io = new Server(httpServer, {
   path: "/Gomoku/socket.io",
-  cors: { origin: "*" }
+  cors: {
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.has(origin)) callback(null, true);
+      else callback(new Error("허용되지 않은 Origin입니다."));
+    }
+  }
 });
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
 io.on("connection", (socket) => {
-  socket.on("createRoom", ({ nickname, boardSize = DEFAULT_BOARD_SIZE }: { nickname: string; boardSize?: number }, reply) => {
+  const eventHits = new Map<string, number[]>();
+  socket.use(([event], next) => {
+    if (isRateLimited(eventHits, String(event))) {
+      next(new Error("요청이 너무 많습니다. 잠시 후 다시 시도하세요."));
+      return;
+    }
+    next();
+  });
+
+  socket.on("createRoom", ({ nickname, boardSize = DEFAULT_BOARD_SIZE, ruleSet = "renju" }: { nickname: string; boardSize?: number; ruleSet?: RuleSet }, reply) => {
     try {
-      const game = createRoom(nickname || "플레이어", socket.id, boardSize);
+      const game = createRoom(nickname || "플레이어", socket.id, boardSize, ruleSet);
       const player = game.players[0];
       store.rooms.set(game.roomId, game);
       store.socketToPlayer.set(socket.id, player.playerId);
@@ -145,6 +168,16 @@ function emitRoom(roomId: string): void {
 
 function message(error: unknown): string {
   return error instanceof Error ? error.message : "알 수 없는 오류입니다.";
+}
+
+function isRateLimited(hits: Map<string, number[]>, event: string): boolean {
+  const now = Date.now();
+  const windowMs = event === "sendChatMessage" ? 5000 : 10000;
+  const limit = event === "sendChatMessage" ? 12 : event === "createRoom" || event === "joinRoom" ? 8 : 80;
+  const recent = (hits.get(event) ?? []).filter((timestamp) => now - timestamp < windowMs);
+  recent.push(now);
+  hits.set(event, recent);
+  return recent.length > limit;
 }
 
 const port = Number(process.env.PORT ?? 3001);

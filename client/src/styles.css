@@ -184,6 +184,20 @@ input:focus {
   color: var(--text);
 }
 
+.state-action.waiting {
+  background: linear-gradient(135deg, #6f9819, #a7cc2c);
+}
+
+.state-action.ready {
+  background: linear-gradient(135deg, #1f7a5a, #45b681);
+  box-shadow: 0 10px 26px rgba(31, 122, 90, 0.22);
+}
+
+.state-action.ready:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
 .top-actions {
   display: flex;
   align-items: center;
@@ -525,6 +539,12 @@ input:focus {
   border-color: rgba(122, 165, 31, 0.45);
   box-shadow: 0 0 0 3px var(--accent-soft);
   background: #fbfff0;
+}
+
+.card-item.active:disabled {
+  opacity: 1;
+  border-color: rgba(31, 122, 90, 0.45);
+  box-shadow: 0 0 0 3px rgba(69, 182, 129, 0.18);
 }
 
 .card-item span {
