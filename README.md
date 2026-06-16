@@ -30,3 +30,7 @@ The Socket.IO server runs on `http://127.0.0.1:3001`.
 - `client/src`: React UI
 - `server/src`: Express and Socket.IO game server
 - `shared`: shared types, card definitions, constants, and rules
+
+
+---
+This project was created with AI.
